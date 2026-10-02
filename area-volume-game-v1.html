@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Area & Volume｜面積與體積挑戰</title>
+  <style>
+    :root{
+      --bg:#f4f7fb;
+      --panel:#ffffff;
+      --ink:#1f2937;
+      --muted:#667085;
+      --primary:#2563eb;
+      --primary-soft:#eaf2ff;
+      --accent:#7c3aed;
+      --ok:#16803a;
+      --ok-soft:#eaf8ee;
+      --warn:#b45309;
+      --warn-soft:#fff6e7;
+      --bad:#b42318;
+      --bad-soft:#fff0ef;
+      --border:#d8e1ec;
+      --shadow:0 12px 30px rgba(15,23,42,.08);
+      --radius:22px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;color:var(--ink);background:linear-gradient(180deg,#f8fbff 0%,var(--bg) 100%)}
+    button,input{font:inherit}
+    button{touch-action:manipulation}
+    .app{min-height:100vh;padding:20px}
+    .shell{max-width:1180px;margin:0 auto}
+
+    .topbar{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      margin-bottom:18px;
+    }
+    .brand{display:flex;align-items:center;gap:12px;min-width:0}
+    .brand-mark{
+      width:48px;height:48px;border-radius:15px;background:linear-gradient(145deg,var(--primary),var(--accent));
+      display:grid;place-items:center;color:white;font-size:24px;font-weight:900;box-shadow:var(--shadow);
+    }
+    .brand h1{font-size:clamp(20px,3vw,30px);margin:0;line-height:1.05}
+    .brand small{display:block;color:var(--muted);font-weight:700;margin-top:3px}
+    .top-actions{display:flex;gap:8px;flex-wrap:wrap}
+
+    .btn{
+      min-height:46px;border:0;border-radius:14px;padding:10px 16px;font-weight:800;cursor:pointer;
+      transition:.18s transform,.18s box-shadow,.18s background;
+    }
+    .btn:hover{transform:translateY(-1px)}
+    .btn:active{transform:translateY(0)}
+    .btn-primary{background:var(--primary);color:#fff;box-shadow:0 8px 18px rgba(37,99,235,.22)}
+    .btn-secondary{background:#fff;color:var(--ink);border:1px solid var(--border)}
+    .btn-soft{background:var(--primary-soft);color:var(--primary)}
+    .btn-ghost{background:transparent;color:var(--muted)}
+    .btn-good{background:var(--ok);color:white}
+    .btn[disabled]{opacity:.5;cursor:not-allowed;transform:none}
+
+    .screen{display:none}
+    .screen.active{display:block}
+
+    .hero{
+      background:var(--panel);border:1px solid var(--border);border-radius:30px;box-shadow:var(--shadow);
+      padding:clamp(24px,4vw,46px);text-align:center;overflow:hidden;position:relative;
+    }
+    .hero::after{
+      content:"";position:absolute;right:-80px;top:-90px;width:230px;height:230px;border-radius:50%;
+      background:radial-gradient(circle,rgba(124,58,237,.14),rgba(124,58,237,0));
+    }
+    .hero h2{font-size:clamp(34px,7vw,68px);margin:4px 0 8px;letter-spacing:-.04em}
+    .hero p{color:var(--muted);font-size:clamp(16px,2.3vw,21px);margin:0 auto 28px;max-width:760px;line-height:1.6}
+    .mode-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:20px}
+    .mode-card{
+      border:1px solid var(--border);border-radius:22px;background:#fff;padding:24px;text-align:left;cursor:pointer;
+      min-height:190px;transition:.2s transform,.2s box-shadow,.2s border-color;
+    }
+    .mode-card:hover{transform:translateY(-4px);box-shadow:var(--shadow);border-color:#b9cdf5}
+    .mode-icon{font-size:38px}
+    .mode-card h3{font-size:24px;margin:12px 0 6px}
+    .mode-card p{font-size:15px;margin:0;color:var(--muted);line-height:1.55}
+    .mode-card .mini{display:inline-block;margin-top:14px;color:var(--primary);font-weight:800}
+
+    .panel{
+      background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);
+      padding:20px;
+    }
+    .section-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+    .section-title h2{margin:0;font-size:clamp(24px,4vw,36px)}
+    .subtitle{color:var(--muted);font-weight:700}
+
+    .segmented{display:flex;gap:8px;flex-wrap:wrap}
+    .segmented .btn.active{background:var(--primary);color:white;border-color:var(--primary)}
+
+    .lesson-grid,.game-grid,.build-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(310px,.75fr);gap:18px}
+    .visual-card{
+      min-height:430px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;
+      background:linear-gradient(180deg,#fbfdff,#f3f7fb);border:1px solid var(--border);border-radius:20px;padding:18px;
+    }
+    .info-card{display:flex;flex-direction:column;gap:14px}
+    .step-box,.question-box,.feedback,.formula-box{
+      border-radius:18px;border:1px solid var(--border);background:#fff;padding:16px;
+    }
+    .step-box h3,.question-box h3{margin:0 0 8px;font-size:22px}
+    .step-box p,.question-box p{margin:0;color:var(--muted);line-height:1.6}
+    .formula-box{background:#f7f9fc;text-align:center;font-size:clamp(20px,3vw,30px);font-weight:900}
+    .formula-box .small{font-size:14px;color:var(--muted);font-weight:700;margin-bottom:6px}
+    .controls{display:flex;gap:10px;flex-wrap:wrap}
+    .controls .btn{flex:1;min-width:120px}
+
+    .area-grid{
+      display:grid;gap:4px;width:min(92%,560px);padding:12px;background:#fff;border:2px solid #9fb7d7;border-radius:16px;
+      box-shadow:0 10px 24px rgba(15,23,42,.08);
+    }
+    .area-cell{
+      aspect-ratio:1/1;display:grid;place-items:center;border:1px solid #c9d8e9;background:#eaf2ff;
+      border-radius:7px;font-size:clamp(8px,1.4vw,12px);font-weight:800;color:#38609a;transition:.25s transform,.25s background,.25s box-shadow;
+      min-width:0;
+    }
+    .area-cell.highlight{background:#bfdbfe;box-shadow:inset 0 0 0 2px #2563eb;transform:scale(1.03)}
+    .area-cell.all-highlight{background:#dbeafe}
+    .measure{
+      position:absolute;background:#fff;border:1px solid var(--border);border-radius:12px;padding:7px 10px;font-weight:900;
+      box-shadow:0 6px 16px rgba(15,23,42,.06);
+    }
+    .measure.x{bottom:16px;left:50%;transform:translateX(-50%)}
+    .measure.y{left:12px;top:50%;transform:translateY(-50%) rotate(-90deg)}
+
+    .canvas-wrap{width:100%;height:100%;min-height:380px;display:grid;place-items:center}
+    canvas{max-width:100%;height:auto}
+
+    .learn-badge,.status-pill{
+      display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:7px 11px;font-weight:900;font-size:14px;
+      background:var(--primary-soft);color:var(--primary);
+    }
+
+    .practice-head{
+      display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;
+    }
+    .scorebar{display:flex;gap:8px;flex-wrap:wrap}
+    .status-pill.gray{background:#eef2f6;color:#475467}
+    .status-pill.fire{background:#fff0e8;color:#c2410c}
+
+    .answer-wrap{display:grid;grid-template-columns:1fr auto;gap:10px}
+    .answer-input{
+      width:100%;min-height:54px;border:2px solid var(--border);border-radius:14px;padding:10px 14px;
+      font-size:24px;font-weight:900;outline:none;background:#fff;
+    }
+    .answer-input:focus{border-color:#7aa2ef;box-shadow:0 0 0 4px rgba(37,99,235,.08)}
+    .unit-row{display:flex;gap:8px;flex-wrap:wrap}
+    .unit-btn{
+      min-height:48px;min-width:80px;border:2px solid var(--border);border-radius:14px;background:white;font-weight:900;cursor:pointer;
+    }
+    .unit-btn.selected{border-color:var(--primary);background:var(--primary-soft);color:var(--primary)}
+
+    .feedback{display:none;line-height:1.55;font-weight:700}
+    .feedback.show{display:block}
+    .feedback.good{background:var(--ok-soft);border-color:#b7e4c4;color:#126b31}
+    .feedback.warn{background:var(--warn-soft);border-color:#f3d3a0;color:#8a4b08}
+    .feedback.bad{background:var(--bad-soft);border-color:#f2b8b5;color:#8f1d16}
+
+    .build-controls{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .counter{
+      border:1px solid var(--border);border-radius:18px;padding:12px;text-align:center;background:#fff;
+    }
+    .counter .label{font-size:14px;color:var(--muted);font-weight:800}
+    .counter .value{font-size:30px;font-weight:900;margin:8px 0}
+    .counter-actions{display:flex;gap:8px}
+    .counter-actions button{
+      width:50%;min-height:46px;border:0;border-radius:12px;background:#eef4ff;color:var(--primary);font-size:25px;font-weight:900;cursor:pointer;
+    }
+    .target{
+      border-radius:18px;padding:16px;background:linear-gradient(135deg,#eff6ff,#f5f3ff);border:1px solid #d9e3ff;
+      text-align:center;
+    }
+    .target .big{font-size:clamp(30px,5vw,52px);font-weight:950;letter-spacing:-.03em}
+    .found-list{display:flex;gap:8px;flex-wrap:wrap}
+    .found-chip{background:#eef8f1;color:#17723a;border:1px solid #c8ead3;border-radius:999px;padding:7px 10px;font-weight:800}
+
+    .tiny-note{font-size:13px;color:var(--muted);line-height:1.5}
+    .hidden{display:none!important}
+    .pulse{animation:pulse .42s ease}
+    @keyframes pulse{50%{transform:scale(1.035)}}
+
+    @media (max-width:900px){
+      .mode-grid{grid-template-columns:1fr}
+      .lesson-grid,.game-grid,.build-grid{grid-template-columns:1fr}
+      .visual-card{min-height:360px}
+      .build-controls{grid-template-columns:1fr 1fr 1fr}
+    }
+    @media (max-width:620px){
+      .app{padding:12px}
+      .topbar{align-items:flex-start}
+      .brand small{display:none}
+      .top-actions .btn{padding:9px 11px}
+      .hero{padding:24px 16px}
+      .panel{padding:14px}
+      .visual-card{min-height:330px;padding:12px}
+      .build-controls{grid-template-columns:1fr}
+      .answer-wrap{grid-template-columns:1fr}
+      .measure.y{left:3px}
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <div class="shell">
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-mark">∎</div>
+        <div>
+          <h1>Area & Volume</h1>
+          <small>面積與體積挑戰</small>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button class="btn btn-secondary" id="homeBtn">🏠 Home</button>
+        <button class="btn btn-secondary" id="resetBtn">↻ Reset</button>
+      </div>
+    </div>
+
+    <!-- HOME -->
+    <section class="screen active" id="homeScreen">
+      <div class="hero">
+        <div class="learn-badge">中一數學 · 互動學習</div>
+        <h2>看得到，先真正明白。</h2>
+        <p>由數格仔開始，逐步理解 <b>Area 面積</b> 與 <b>Volume 體積</b>；再透過練習與建構挑戰，把公式變成真正理解。</p>
+        <div class="mode-grid">
+          <button class="mode-card" data-open="learn">
+            <div class="mode-icon">👀</div>
+            <h3>Learn 學習模式</h3>
+            <p>逐步看清楚「長 × 闊」和「長 × 闊 × 高」到底代表甚麼。</p>
+            <span class="mini">開始理解 →</span>
+          </button>
+          <button class="mode-card" data-open="practice">
+            <div class="mode-icon">✏️</div>
+            <h3>Practice 練習模式</h3>
+            <p>由圖像提示慢慢過渡至純計算，並練習 cm、cm²、cm³。</p>
+            <span class="mini">開始練習 →</span>
+          </button>
+          <button class="mode-card" data-open="build">
+            <div class="mode-icon">🏗️</div>
+            <h3>Build It 建構挑戰</h3>
+            <p>反過來由指定面積／體積，自己建立不同大小的長方形或長方體。</p>
+            <span class="mini">開始建構 →</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- LEARN -->
+    <section class="screen" id="learnScreen">
+      <div class="panel">
+        <div class="section-title">
+          <div>
+            <h2>Learn 學習模式</h2>
+            <div class="subtitle">先看懂概念，再記公式。</div>
+          </div>
+          <div class="segmented">
+            <button class="btn btn-secondary active" id="learnAreaBtn">Area 面積</button>
+            <button class="btn btn-secondary" id="learnVolumeBtn">Volume 體積</button>
+          </div>
+        </div>
+        <div class="lesson-grid">
+          <div class="visual-card" id="learnVisual"></div>
+          <div class="info-card">
+            <div class="step-box">
+              <div class="learn-badge" id="learnStepBadge">Step 1</div>
+              <h3 id="learnTitle">每個小格有多大？</h3>
+              <p id="learnText"></p>
+            </div>
+            <div class="formula-box" id="learnFormula"></div>
+            <div class="controls">
+              <button class="btn btn-secondary" id="prevStepBtn">← Previous</button>
+              <button class="btn btn-soft" id="toggleUnitsBtn">👁 Show Units</button>
+              <button class="btn btn-primary" id="nextStepBtn">Next →</button>
+            </div>
+            <div class="controls">
+              <button class="btn btn-secondary" id="replayBtn">↻ Replay 重播</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PRACTICE -->
+    <section class="screen" id="practiceScreen">
+      <div class="panel">
+        <div class="practice-head">
+          <div>
+            <h2 style="margin:0">Practice 練習模式</h2>
+            <div class="subtitle">圖像 → 提示 → 自己計算</div>
+          </div>
+          <div class="segmented">
+            <button class="btn btn-secondary active practice-mode" data-mode="area">Area</button>
+            <button class="btn btn-secondary practice-mode" data-mode="volume">Volume</button>
+            <button class="btn btn-secondary practice-mode" data-mode="mixed">Mixed</button>
+          </div>
+        </div>
+
+        <div class="scorebar" style="margin-bottom:14px">
+          <span class="status-pill gray" id="questionCount">Question 1 / 10</span>
+          <span class="status-pill">Score <b id="scoreVal">0</b></span>
+          <span class="status-pill fire">🔥 Streak <b id="streakVal">0</b></span>
+        </div>
+
+        <div class="game-grid">
+          <div class="visual-card" id="practiceVisual"></div>
+          <div class="info-card">
+            <div class="question-box">
+              <h3 id="questionTitle"></h3>
+              <p id="questionText"></p>
+            </div>
+
+            <div class="step-box">
+              <div style="font-weight:900;margin-bottom:8px">Answer 答案</div>
+              <div class="answer-wrap">
+                <input id="answerInput" class="answer-input" type="number" min="1" inputmode="numeric" placeholder="?" />
+                <button class="btn btn-primary" id="checkBtn">Check Answer</button>
+              </div>
+              <div style="font-weight:900;margin:14px 0 8px">Unit 單位</div>
+              <div class="unit-row">
+                <button class="unit-btn" data-unit="cm">cm</button>
+                <button class="unit-btn" data-unit="cm²">cm²</button>
+                <button class="unit-btn" data-unit="cm³">cm³</button>
+              </div>
+            </div>
+
+            <div class="feedback" id="feedbackBox"></div>
+
+            <div class="controls">
+              <button class="btn btn-soft" id="hintBtn">💡 Hint 提示</button>
+              <button class="btn btn-good hidden" id="nextQuestionBtn">Next Question →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- BUILD -->
+    <section class="screen" id="buildScreen">
+      <div class="panel">
+        <div class="section-title">
+          <div>
+            <h2>Build It 建構挑戰</h2>
+            <div class="subtitle">由答案反過來建立圖形。</div>
+          </div>
+          <div class="segmented">
+            <button class="btn btn-secondary active" id="buildAreaBtn">Area 面積</button>
+            <button class="btn btn-secondary" id="buildVolumeBtn">Volume 體積</button>
+          </div>
+        </div>
+
+        <div class="build-grid">
+          <div class="visual-card" id="buildVisual"></div>
+          <div class="info-card">
+            <div class="target">
+              <div class="tiny-note">你的任務 Target</div>
+              <div class="big" id="buildTarget"></div>
+              <div id="buildTargetText" class="subtitle"></div>
+            </div>
+
+            <div class="build-controls" id="buildControls"></div>
+
+            <div class="formula-box" id="buildFormula"></div>
+            <div class="feedback show warn" id="buildFeedback">調整數值，直到剛好符合目標。</div>
+
+            <div>
+              <div style="font-weight:900;margin-bottom:8px">已找到的組合 Found</div>
+              <div class="found-list" id="foundList"></div>
+            </div>
+
+            <div class="controls">
+              <button class="btn btn-primary" id="newBuildBtn">🎲 New Challenge</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+(() => {
+  const $ = s => document.querySelector(s);
+  const $$ = s => [...document.querySelectorAll(s)];
+
+  const screens = {
+    home: $('#homeScreen'),
+    learn: $('#learnScreen'),
+    practice: $('#practiceScreen'),
+    build: $('#buildScreen')
+  };
+
+  let currentScreen = 'home';
+
+  function showScreen(name){
+    Object.entries(screens).forEach(([k,el]) => el.classList.toggle('active', k === name));
+    currentScreen = name;
+    window.scrollTo({top:0,behavior:'smooth'});
+    if(name === 'learn') renderLearn();
+    if(name === 'practice') startPractice(practiceMode);
+    if(name === 'build') newBuildChallenge();
+  }
+
+  $$('[data-open]').forEach(btn => btn.addEventListener('click', () => showScreen(btn.dataset.open)));
+  $('#homeBtn').addEventListener('click', () => showScreen('home'));
+  $('#resetBtn').addEventListener('click', () => {
+    if(currentScreen === 'learn'){ learnStep = 0; showUnits = false; renderLearn(); }
+    if(currentScreen === 'practice'){ startPractice(practiceMode); }
+    if(currentScreen === 'build'){ newBuildChallenge(); }
+  });
+
+  /* ---------- VISUAL HELPERS ---------- */
+
+  function makeAreaGrid(container, l, w, opts={}){
+    container.innerHTML = '';
+    const grid = document.createElement('div');
+    grid.className = 'area-grid';
+    grid.style.gridTemplateColumns = `repeat(${l}, minmax(0,1fr))`;
+    for(let r=0;r<w;r++){
+      for(let c=0;c<l;c++){
+        const cell = document.createElement('div');
+        cell.className = 'area-cell';
+        if(opts.highlightRow === r) cell.classList.add('highlight');
+        if(opts.highlightAll) cell.classList.add('all-highlight');
+        if(opts.showUnits && l*w <= 40) cell.textContent = '1 cm²';
+        grid.appendChild(cell);
+      }
+    }
+    container.appendChild(grid);
+
+    if(opts.measures !== false){
+      const mx = document.createElement('div');
+      mx.className = 'measure x';
+      mx.textContent = `Length 長 = ${l} cm`;
+      container.appendChild(mx);
+
+      const my = document.createElement('div');
+      my.className = 'measure y';
+      my.textContent = `Width 闊 = ${w} cm`;
+      container.appendChild(my);
+    }
+  }
+
+  function isoPoint(ox, oy, x, y, z, sx, sy, sz){
+    return [ox + (x-y)*sx, oy + (x+y)*sy - z*sz];
+  }
+
+  function drawCube(ctx, ox, oy, x, y, z, sx, sy, sz, alpha=1){
+    const p = (dx,dy,dz) => isoPoint(ox,oy,x+dx,y+dy,z+dz,sx,sy,sz);
+    const A=p(0,0,1), B=p(1,0,1), C=p(1,1,1), D=p(0,1,1);
+    const A0=p(0,0,0), B0=p(1,0,0), C0=p(1,1,0), D0=p(0,1,0);
+
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.lineWidth = 1.2;
+    ctx.strokeStyle = '#53739b';
+
+    ctx.beginPath(); [A,B,C,D].forEach((q,i)=>i?ctx.lineTo(...q):ctx.moveTo(...q)); ctx.closePath();
+    ctx.fillStyle='#dbeafe'; ctx.fill(); ctx.stroke();
+
+    ctx.beginPath(); [B,B0,C0,C].forEach((q,i)=>i?ctx.lineTo(...q):ctx.moveTo(...q)); ctx.closePath();
+    ctx.fillStyle='#9ec5f4'; ctx.fill(); ctx.stroke();
+
+    ctx.beginPath(); [D,C,C0,D0].forEach((q,i)=>i?ctx.lineTo(...q):ctx.moveTo(...q)); ctx.closePath();
+    ctx.fillStyle='#7fb2ee'; ctx.fill(); ctx.stroke();
+
+    ctx.restore();
+  }
+
+  function drawCuboid(canvas, l,w,h, opts={}){
+    const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+    const cssW = 620, cssH = 380;
+    canvas.width = cssW*dpr; canvas.height = cssH*dpr;
+    canvas.style.width = '100%';
+    canvas.style.maxWidth = cssW+'px';
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr,dpr);
+    ctx.clearRect(0,0,cssW,cssH);
+
+    const sx = Math.min(28, 190/Math.max(l,w,1));
+    const sy = sx*0.52;
+    const sz = Math.min(26, 150/Math.max(h,1));
+    const ox = cssW/2 + (w-l)*sx/2;
+    const oy = 270 - ((l+w)*sy)/2 + h*sz/2;
+
+    const maxH = opts.displayHeight ?? h;
+    for(let z=0;z<maxH;z++){
+      for(let y=w-1;y>=0;y--){
+        for(let x=0;x<l;x++){
+          drawCube(ctx,ox,oy,x,y,z,sx,sy,sz,1);
+        }
+      }
+    }
+
+    ctx.fillStyle = '#334155';
+    ctx.font = '700 16px system-ui';
+    ctx.textAlign='center';
+    ctx.fillText(`Length 長 = ${l} cm`, cssW/2, 350);
+    ctx.save();
+    ctx.translate(40,cssH/2); ctx.rotate(-Math.PI/2);
+    ctx.fillText(`Height 高 = ${h} cm`,0,0);
+    ctx.restore();
+    ctx.fillText(`Width 闊 = ${w} cm`, cssW-95, 320);
+  }
+
+  function makeCanvas(container){
+    container.innerHTML = '<div class="canvas-wrap"><canvas></canvas></div>';
+    return container.querySelector('canvas');
+  }
+
+  /* ---------- LEARN ---------- */
+
+  let learnMode = 'area';
+  let learnStep = 0;
+  let showUnits = false;
+
+  const areaSteps = [
+    {
+      title:'每個小格有多大？',
+      text:'這個長方形由很多個單位正方形組成。每一格代表 1 cm²。',
+      formula:'1 cm × 1 cm = 1 cm²'
+    },
+    {
+      title:'先看一行',
+      text:'每一行有 6 個小格，所以一行可以看成 6 個 1 cm²。',
+      formula:'每行 6 格'
+    },
+    {
+      title:'一共有幾行？',
+      text:'一共有 4 行。即是把「每行 6 格」重複 4 次。',
+      formula:'6 × 4 = 24'
+    },
+    {
+      title:'這就是面積',
+      text:'整個長方形共有 24 個 1 cm² 小格，所以面積是 24 cm²。',
+      formula:'Area 面積 = 6 × 4 = 24 cm²'
+    },
+    {
+      title:'整理成公式',
+      text:'長方形面積就是 Length 長 × Width 闊。',
+      formula:'Area = Length × Width'
+    }
+  ];
+
+  const volumeSteps = [
+    {
+      title:'先看第一層',
+      text:'底層長 4、闊 3，所以第一層有 4 × 3 = 12 個 unit cubes。',
+      formula:'4 × 3 = 12 cubes'
+    },
+    {
+      title:'再疊高一層',
+      text:'第二層也是 12 個 cubes。現在你可以看到「每一層都一樣大」。',
+      formula:'12 cubes per layer'
+    },
+    {
+      title:'繼續增加高度',
+      text:'高度代表有多少層。這個長方體的 Height 高 = 5 cm。',
+      formula:'5 layers'
+    },
+    {
+      title:'把每層乘起來',
+      text:'每層 12 個 cubes，一共有 5 層，所以共有 60 個 unit cubes。',
+      formula:'12 × 5 = 60'
+    },
+    {
+      title:'這就是體積',
+      text:'一個 unit cube 是 1 cm³，所以整個長方體的體積是 60 cm³。',
+      formula:'Volume 體積 = 60 cm³'
+    },
+    {
+      title:'整理成公式',
+      text:'長方體體積就是 Length 長 × Width 闊 × Height 高。',
+      formula:'Volume = Length × Width × Height'
+    }
+  ];
+
+  function renderLearn(){
+    const steps = learnMode === 'area' ? areaSteps : volumeSteps;
+    learnStep = Math.max(0, Math.min(learnStep, steps.length-1));
+    const s = steps[learnStep];
+    $('#learnStepBadge').textContent = `Step ${learnStep+1} / ${steps.length}`;
+    $('#learnTitle').textContent = s.title;
+    $('#learnText').textContent = s.text;
+    $('#learnFormula').innerHTML = `<div class="small">重點 Key Idea</div>${s.formula}`;
+
+    $('#prevStepBtn').disabled = learnStep===0;
+    $('#nextStepBtn').disabled = learnStep===steps.length-1;
+    $('#toggleUnitsBtn').textContent = showUnits ? '🙈 Hide Units' : '👁 Show Units';
+
+    $('#learnAreaBtn').classList.toggle('active', learnMode==='area');
+    $('#learnVolumeBtn').classList.toggle('active', learnMode==='volume');
+
+    const v = $('#learnVisual');
+    if(learnMode==='area'){
+      makeAreaGrid(v,6,4,{
+        showUnits,
+        highlightRow: learnStep===1 ? 0 : null,
+        highlightAll: learnStep>=2
+      });
+    }else{
+      const canvas = makeCanvas(v);
+      const shown = [1,2,3,5,5,5][learnStep];
+      drawCuboid(canvas,4,3,5,{displayHeight:shown});
+      if(showUnits){
+        const badge = document.createElement('div');
+        badge.className='measure x';
+        badge.style.bottom='8px';
+        badge.textContent='1 cube = 1 cm³';
+        v.appendChild(badge);
+      }
+    }
+  }
+
+  $('#learnAreaBtn').addEventListener('click',()=>{learnMode='area';learnStep=0;renderLearn()});
+  $('#learnVolumeBtn').addEventListener('click',()=>{learnMode='volume';learnStep=0;renderLearn()});
+  $('#prevStepBtn').addEventListener('click',()=>{learnStep--;renderLearn()});
+  $('#nextStepBtn').addEventListener('click',()=>{learnStep++;renderLearn()});
+  $('#toggleUnitsBtn').addEventListener('click',()=>{showUnits=!showUnits;renderLearn()});
+  $('#replayBtn').addEventListener('click',()=>{learnStep=0;renderLearn()});
+
+  /* ---------- PRACTICE ---------- */
+
+  let practiceMode = 'area';
+  let qIndex = 0, score = 0, streak = 0, currentQ = null, selectedUnit = null, hintLevel = 0, answered = false;
+
+  function rand(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+
+  function startPractice(mode){
+    practiceMode = mode;
+    qIndex=0; score=0; streak=0;
+    $$('.practice-mode').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));
+    nextQuestion(true);
+  }
+
+  function chooseKind(){
+    if(practiceMode==='mixed') return Math.random()<.5?'area':'volume';
+    return practiceMode;
+  }
+
+  function generateQuestion(){
+    const kind = chooseKind();
+    if(kind==='area'){
+      const l=rand(2,9), w=rand(2,7);
+      const phase = qIndex < 3 ? 'visual' : qIndex < 6 ? 'guided' : 'abstract';
+      return {
+        kind,l,w,answer:l*w,unit:'cm²',phase,
+        title: phase==='visual' ? '數一數，再想一想。' : '計算這個長方形的面積。',
+        text: phase==='visual'
+          ? `每個小格代表 1 cm²。這個長方形的面積是多少？`
+          : `Length 長 = ${l} cm，Width 闊 = ${w} cm。Area 面積是多少？`
+      };
+    }else{
+      const l=rand(2,6), w=rand(2,5), h=rand(2,5);
+      const phase = qIndex < 3 ? 'visual' : qIndex < 6 ? 'guided' : 'abstract';
+      return {
+        kind,l,w,h,answer:l*w*h,unit:'cm³',phase,
+        title: phase==='visual' ? '看清楚每一層。' : '計算這個長方體的體積。',
+        text: phase==='guided'
+          ? `每層有 ${l*w} 個 cubes，一共有 ${h} 層。Volume 體積是多少？`
+          : `Length 長 = ${l} cm，Width 闊 = ${w} cm，Height 高 = ${h} cm。Volume 體積是多少？`
+      };
+    }
+  }
+
+  function renderQuestion(){
+    $('#questionCount').textContent = `Question ${qIndex+1} / 10`;
+    $('#scoreVal').textContent = score;
+    $('#streakVal').textContent = streak;
+    $('#questionTitle').textContent = currentQ.title;
+    $('#questionText').textContent = currentQ.text;
+    $('#answerInput').value='';
+    selectedUnit=null; hintLevel=0; answered=false;
+    $$('.unit-btn').forEach(b=>b.classList.remove('selected'));
+    $('#feedbackBox').className='feedback';
+    $('#feedbackBox').textContent='';
+    $('#nextQuestionBtn').classList.add('hidden');
+    $('#checkBtn').disabled=false;
+    $('#hintBtn').disabled=false;
+
+    const v = $('#practiceVisual');
+    if(currentQ.kind==='area'){
+      if(currentQ.phase==='abstract'){
+        v.innerHTML = `
+          <div style="text-align:center">
+            <div style="font-size:72px">▭</div>
+            <div class="formula-box" style="min-width:260px">
+              <div class="small">Dimensions 尺寸</div>
+              ${currentQ.l} cm × ${currentQ.w} cm
+            </div>
+          </div>`;
+      }else{
+        makeAreaGrid(v,currentQ.l,currentQ.w,{showUnits:currentQ.phase==='visual'});
+      }
+    }else{
+      if(currentQ.phase==='abstract'){
+        v.innerHTML = `
+          <div style="text-align:center">
+            <div style="font-size:70px">📦</div>
+            <div class="formula-box" style="min-width:260px">
+              <div class="small">Dimensions 尺寸</div>
+              ${currentQ.l} × ${currentQ.w} × ${currentQ.h} cm
+            </div>
+          </div>`;
+      }else{
+        const canvas = makeCanvas(v);
+        drawCuboid(canvas,currentQ.l,currentQ.w,currentQ.h);
+      }
+    }
+  }
+
+  function showFeedback(type,html){
+    const box=$('#feedbackBox');
+    box.className=`feedback show ${type}`;
+    box.innerHTML=html;
+  }
+
+  function validateAnswer(){
+    const raw = $('#answerInput').value.trim();
+    const num = Number(raw);
+    if(raw==='' || !Number.isFinite(num) || num<=0){
+      showFeedback('warn','請輸入一個大於 0 的數字。');
+      return;
+    }
+    if(!selectedUnit){
+      showFeedback('warn','數值輸入了，還要選擇正確的 Unit 單位。');
+      return;
+    }
+
+    if(num === currentQ.answer && selectedUnit === currentQ.unit){
+      score++;
+      streak++;
+      answered=true;
+      $('#scoreVal').textContent=score;
+      $('#streakVal').textContent=streak;
+      showFeedback('good',`✅ <b>答對了！</b><br>${currentQ.kind==='area'
+        ? `${currentQ.l} × ${currentQ.w} = ${currentQ.answer} cm²`
+        : `${currentQ.l} × ${currentQ.w} × ${currentQ.h} = ${currentQ.answer} cm³`}`);
+      $('#nextQuestionBtn').classList.remove('hidden');
+      $('#checkBtn').disabled=true;
+      $('#hintBtn').disabled=true;
+      $('#practiceVisual').classList.add('pulse');
+      setTimeout(()=>$('#practiceVisual').classList.remove('pulse'),450);
+      return;
+    }
+
+    streak=0;
+    $('#streakVal').textContent=streak;
+
+    if(num === currentQ.answer && selectedUnit !== currentQ.unit){
+      showFeedback('warn',
+        currentQ.kind==='area'
+          ? `你的<b>數值正確</b>，但單位要再想一想。面積是二維平面，所以要用 <b>cm²</b>。`
+          : `你的<b>數值正確</b>，但單位要再想一想。體積是三維空間，所以要用 <b>cm³</b>。`
+      );
+      return;
+    }
+
+    if(currentQ.kind==='area' && num === currentQ.l + currentQ.w){
+      showFeedback('bad',`你似乎把長和闊<b>相加</b>了。想一想：每行有 ${currentQ.l} 格，一共有 ${currentQ.w} 行。`);
+      return;
+    }
+
+    if(currentQ.kind==='volume' && num === currentQ.l * currentQ.w){
+      showFeedback('bad',`你算到了<b>一層</b>的方塊數量：${currentQ.l} × ${currentQ.w} = ${currentQ.l*currentQ.w}。但還有 <b>${currentQ.h} 層</b>。`);
+      return;
+    }
+
+    showFeedback('bad','未正確。先不要急着猜答案，可以按 <b>Hint 提示</b>，再看看圖形中的尺寸。');
+  }
+
+  function showHint(){
+    hintLevel++;
+    if(currentQ.kind==='area'){
+      if(hintLevel===1) showFeedback('warn','💡 面積可以想成：「每一行有多少格 × 一共有多少行」。');
+      else if(hintLevel===2) showFeedback('warn',`💡 留意：Length 長 = ${currentQ.l} cm，Width 闊 = ${currentQ.w} cm。`);
+      else showFeedback('warn','💡 公式：<b>Area = Length × Width</b>，答案使用 <b>cm²</b>。');
+    }else{
+      if(hintLevel===1) showFeedback('warn','💡 體積可以想成：「每層有多少 cube × 一共有多少層」。');
+      else if(hintLevel===2) showFeedback('warn',`💡 一層有 ${currentQ.l} × ${currentQ.w} = ${currentQ.l*currentQ.w} 個 cubes，高度共有 ${currentQ.h} 層。`);
+      else showFeedback('warn','💡 公式：<b>Volume = Length × Width × Height</b>，答案使用 <b>cm³</b>。');
+    }
+  }
+
+  function nextQuestion(initial=false){
+    if(!initial) qIndex++;
+    if(qIndex>=10){
+      $('#practiceVisual').innerHTML=`
+        <div style="text-align:center">
+          <div style="font-size:72px">🎉</div>
+          <h2 style="font-size:38px;margin:8px 0">完成！</h2>
+          <p class="subtitle">你答對了 ${score} / 10 題。</p>
+        </div>`;
+      $('#questionTitle').textContent='Practice Complete';
+      $('#questionText').textContent='你可以按 Reset 再挑戰一次，或者切換 Area / Volume / Mixed。';
+      $('#checkBtn').disabled=true; $('#hintBtn').disabled=true; $('#nextQuestionBtn').classList.add('hidden');
+      return;
+    }
+    currentQ = generateQuestion();
+    renderQuestion();
+  }
+
+  $$('.practice-mode').forEach(b=>b.addEventListener('click',()=>startPractice(b.dataset.mode)));
+  $$('.unit-btn').forEach(b=>b.addEventListener('click',()=>{
+    selectedUnit=b.dataset.unit;
+    $$('.unit-btn').forEach(x=>x.classList.toggle('selected',x===b));
+  }));
+  $('#checkBtn').addEventListener('click',validateAnswer);
+  $('#hintBtn').addEventListener('click',showHint);
+  $('#nextQuestionBtn').addEventListener('click',()=>nextQuestion(false));
+  $('#answerInput').addEventListener('keydown',e=>{ if(e.key==='Enter') validateAnswer(); });
+
+  /* ---------- BUILD ---------- */
+
+  let buildMode='area';
+  let buildTarget=24;
+  let dims={l:6,w:4,h:2};
+  let found=new Set();
+
+  const areaTargets=[12,18,20,24,30,36,40,48,60];
+  const volumeTargets=[24,36,48,60,72,96];
+
+  function newBuildChallenge(){
+    found=new Set();
+    $('#foundList').innerHTML='';
+    if(buildMode==='area'){
+      buildTarget=areaTargets[rand(0,areaTargets.length-1)];
+      dims={l:rand(2,6),w:rand(2,6),h:2};
+    }else{
+      buildTarget=volumeTargets[rand(0,volumeTargets.length-1)];
+      dims={l:rand(2,5),w:rand(2,4),h:rand(2,4)};
+    }
+    renderBuild();
+  }
+
+  function renderBuild(){
+    $('#buildAreaBtn').classList.toggle('active',buildMode==='area');
+    $('#buildVolumeBtn').classList.toggle('active',buildMode==='volume');
+
+    $('#buildTarget').textContent = `${buildTarget} ${buildMode==='area'?'cm²':'cm³'}`;
+    $('#buildTargetText').textContent = buildMode==='area'
+      ? '建立一個這個面積的長方形。'
+      : '建立一個這個體積的長方體。';
+
+    const controls=$('#buildControls');
+    const labels = buildMode==='area'
+      ? [['l','Length 長'],['w','Width 闊']]
+      : [['l','Length 長'],['w','Width 闊'],['h','Height 高']];
+
+    controls.innerHTML = labels.map(([key,label])=>`
+      <div class="counter">
+        <div class="label">${label}</div>
+        <div class="value">${dims[key]}</div>
+        <div class="counter-actions">
+          <button data-change="${key}" data-delta="-1">−</button>
+          <button data-change="${key}" data-delta="1">+</button>
+        </div>
+      </div>`).join('');
+
+    $$('[data-change]').forEach(btn=>btn.addEventListener('click',()=>{
+      const k=btn.dataset.change, d=Number(btn.dataset.delta);
+      dims[k]=Math.max(1,Math.min(12,dims[k]+d));
+      renderBuild();
+    }));
+
+    const val = buildMode==='area' ? dims.l*dims.w : dims.l*dims.w*dims.h;
+    $('#buildFormula').innerHTML = buildMode==='area'
+      ? `<div class="small">目前 Current</div>${dims.l} × ${dims.w} = ${val} cm²`
+      : `<div class="small">目前 Current</div>${dims.l} × ${dims.w} × ${dims.h} = ${val} cm³`;
+
+    const v=$('#buildVisual');
+    if(buildMode==='area'){
+      makeAreaGrid(v,dims.l,dims.w,{showUnits:dims.l*dims.w<=40});
+    }else{
+      const canvas=makeCanvas(v);
+      drawCuboid(canvas,dims.l,dims.w,dims.h);
+    }
+
+    const fb=$('#buildFeedback');
+    if(val===buildTarget){
+      const key = buildMode==='area'
+        ? [dims.l,dims.w].sort((a,b)=>a-b).join('×')
+        : [dims.l,dims.w,dims.h].sort((a,b)=>a-b).join('×');
+
+      const isNew=!found.has(key);
+      found.add(key);
+      fb.className='feedback show good';
+      fb.innerHTML = isNew
+        ? `✅ <b>成功！</b> 你找到一個正確組合。試下再找另一個不同組合。`
+        : `✅ 這個組合仍然正確。你之前已經找到過它。`;
+
+      $('#foundList').innerHTML=[...found].map(x=>`<span class="found-chip">${x}</span>`).join('');
+      v.classList.add('pulse');
+      setTimeout(()=>v.classList.remove('pulse'),450);
+    }else{
+      fb.className='feedback show warn';
+      fb.innerHTML = val < buildTarget
+        ? `現在是 <b>${val}</b>，比目標小。可以嘗試增加尺寸。`
+        : `現在是 <b>${val}</b>，比目標大。可以嘗試減少尺寸。`;
+    }
+  }
+
+  $('#buildAreaBtn').addEventListener('click',()=>{buildMode='area';newBuildChallenge()});
+  $('#buildVolumeBtn').addEventListener('click',()=>{buildMode='volume';newBuildChallenge()});
+  $('#newBuildBtn').addEventListener('click',newBuildChallenge);
+
+  /* ---------- RESIZE ---------- */
+  let resizeTimer;
+  window.addEventListener('resize',()=>{
+    clearTimeout(resizeTimer);
+    resizeTimer=setTimeout(()=>{
+      if(currentScreen==='learn' && learnMode==='volume') renderLearn();
+      if(currentScreen==='practice' && currentQ?.kind==='volume') renderQuestion();
+      if(currentScreen==='build' && buildMode==='volume') renderBuild();
+    },120);
+  });
+
+})();
+</script>
+</body>
+</html>
